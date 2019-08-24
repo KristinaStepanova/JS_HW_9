@@ -11,7 +11,6 @@ function myHttp() {
             return;
           }
           const response = JSON.parse(xhr.responseText);
-          console.log(response);
           cb(null, response);
         });
 
@@ -57,17 +56,17 @@ function myHttp() {
 // Init http module
 const http = myHttp();
 const newsService = (function () {
-	const apiKey = '707779af7eb74d66955a486612084779';
-	const apiUrl = 'https://newsapi.org/v2';
+  const apiKey = '707779af7eb74d66955a486612084779';
+  const apiUrl = 'https://newsapi.org/v2';
 
-	return {
-		topHeadlines(country = 'ua', category = 'sport', cb) {
-			http.get(`${apiUrl}/top-headlines?country=${country}&category=${category}&apiKey=${apiKey}`, cb);
-		},
-		everything(text) {
-			http.get(`${apiUrl}/everything?q=${text}&apiKey=${apiKey}`, cb);
-		}
-	}
+  return {
+    topHeadlines(country = 'ua', category = 'sport', cb) {
+      http.get(`${apiUrl}/top-headlines?country=${country}&category=${category}&apiKey=${apiKey}`, cb);
+    },
+    everything(text, cb) {
+      http.get(`${apiUrl}/everything?q=${text}&apiKey=${apiKey}`, cb);
+    }
+  }
 }());
 
 // Elements
@@ -77,55 +76,56 @@ const formCountry = form.elements['country'];
 const formSearch = form.elements['search'];
 const formCat = form.elements['categories'];
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   M.AutoInit();
-  //loadNews();
 });
 
-form.addEventListener('submit', loadNews);
+form.addEventListener('submit', e => loadNews(e)
+);
 
-function loadNews() {
+function loadNews(e) {
+  e.preventDefault();
+
   const countryValue = formCountry.value;
   const searchValue = formSearch.value;
   const catValue = formCat.value;
-  
-  if(searchValue) {
-    newsService.everything(searchValue);
+
+  if (searchValue) {
+    newsService.everything(searchValue, onGetResponse);
   } else {
     newsService.topHeadlines(countryValue, catValue, onGetResponse);
   }
-  //form.reset();
+  form.reset();
 }
 
 function onGetResponse(err, res) {
-	if (err) {
-		alert(err);
-		return;
-	}
+  if (err) {
+    alert(err);
+    return;
+  }
 
-	if (!res.articles.length) {
-		alert('Новостей не найдено');
-		return;
-	}
+  if (!res.articles.length) {
+    alert('Новостей не найдено');
+    return;
+  }
 
-	renderNews(res.articles);
+  renderNews(res.articles);
 }
 
 function renderNews(newsItems) {
   newsContainer.innerHTML = '';
-	let fragment = '';
+  let fragment = '';
 
-	newsItems.forEach(item => {
-		const el = newsTemplate(item);
-		console.log(el);
-		fragment += el;
-	});
+  newsItems.forEach(item => {
+    const el = newsTemplate(item);
+    fragment += el;
+  });
 
-	newsContainer.insertAdjacentHTML('afterbegin', fragment);
+  newsContainer.insertAdjacentHTML('afterbegin', fragment);
 }
 
 function newsTemplate({ url, title, description, urlToImage } = {}) {
-	return `
+  return `
     <div class="col s12">
       <div class="card">
         <div class="card-image">
