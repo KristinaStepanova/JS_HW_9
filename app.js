@@ -78,13 +78,16 @@ const formCat = form.elements['categories'];
 
 document.addEventListener('DOMContentLoaded', function () {
   M.AutoInit();
+  loadNews();
 });
 
-form.addEventListener('submit', e => loadNews(e)
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  loadNews();
+}
 );
 
-function loadNews(e) {
-  e.preventDefault();
+function loadNews() {
 
   const countryValue = formCountry.value;
   const searchValue = formSearch.value;
